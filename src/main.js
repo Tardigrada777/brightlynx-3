@@ -2,6 +2,8 @@ class Game{
 	// Размер игрового поля
 	_size;
 
+	_range = [];
+
 	// Цвета
 	_colors = [
 		'#2ecc71', '#8e44ad', '#f1c40f', '#c0392b', 
@@ -10,11 +12,19 @@ class Game{
 
 	constructor(size){
 		this._size = size;
+		this.range = size ** 2;
 		this._generateInterface();
 	}
 
 	start(){
 		console.log('Поехали!')
+	}
+
+	set range(value){
+		this._range = Array.from({
+			length: value
+		}, (v, k) => k + 1)
+		return true;
 	}
 
 	_setNumbers(){
@@ -27,10 +37,30 @@ class Game{
 		}
 	}
 
+	_getRandomNumber(Max){
+		/* Генерирует случайное число в диапазоне от 0 до Max */
+		return Math.round(Math.random() * (Max - 1)) + 1;
+	}
+
+	_getPairsOfNumbers(){
+		/* Получает пары случайных чисел */
+		const pairs = [];
+		this._range.sort(() => {
+			return Math.random() - .5;
+		})
+		
+		for (let i = 0; i < this._range.length; i++){
+			if (i % 2 == 0){
+				const newPair = this._range.slice(i, i + 2);
+				pairs.push(newPair);
+			}
+		}
+	}
+
 	_randomSortColors(){
 		/* Перетасовывает цвета случайным образом */
 		this._colors.sort(() => {
-			return Math.random() - 1;
+			return Math.random() - .5;
 		})
 	}
 
@@ -55,7 +85,7 @@ class Game{
 		btn.classList.add('btn-game')
 		btn.innerHTML = 'Играть';
 		btn.addEventListener('click', () => {
-			this.start();
+			this._getPairsOfNumbers();
 		})
 		container.append(btn)
 

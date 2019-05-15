@@ -9,6 +9,13 @@ class Game{
 	_firstNumber = null;
 	_pairsOfCells = [];
 
+	_selectedCells = [];
+	_isRunnig = false;
+
+	_startTime = null;
+	_currentTime = null;
+	_timeLabel = null;
+
 	// Цвета
 	_colors = [
 		'#2ecc71', '#8e44ad', '#f1c40f', '#c0392b', 
@@ -22,8 +29,32 @@ class Game{
 		this._getPairsOfNumbers();
 	}
 
-	start(){
-		console.log('Поехали!')
+	_isPlayerWin(){
+		return this._selectedCells.length == this._size ** 2;
+	}
+
+	_tick(){
+		this._startTime = new Date();
+
+		setInterval(() => {
+			const currentTime = new Date();
+			const delta = currentTime.getTime() - this._startTime.getTime();
+			
+			let seconds = (delta / 1000).toFixed(0);
+			let minutes = Math.floor(seconds / 60);
+
+			// TODO: Логика таймера
+			let time;
+			if (seconds < 60){
+				time = `00 мин. ${seconds} сек.`;
+			} else {
+				seconds = seconds - (minutes * 60)
+				time = `${minutes} мин. ${seconds} сек.`;
+			}
+			
+			this._currentTime = time;
+			this._timeLabel.innerHTML = time;
+		}, 500)
 	}
 
 	_findPairByNumber(number){
@@ -63,8 +94,8 @@ class Game{
 			cell.style.backgroundColor = this._colors[this._currentPair.colorIndex]
 			
 			this._isTurn = true;
+			this._selectedCells.push(cellNumber)
 			this._firstNumber = parseInt(cellNumber);
-
 		} else {
 			let secondNumber;
 
@@ -78,7 +109,15 @@ class Game{
 			const cell = document.querySelector(`[data-number="${cellNumber}"]`);
 			if (parseInt(cellNumber) === secondNumber){
 				cell.style.backgroundColor = this._colors[this._currentPair.colorIndex]
+
 				this._isTurn = false;
+				this._selectedCells.push(cellNumber)
+
+				if (this._isPlayerWin()){
+					setTimeout(() => {
+						alert(`Вы выиграли! Затраченное время ${this._currentTime}`)
+					}, 0)
+				}
 			} else {
 				const color = this._findColorByNumber(cellNumber); 
 				cell.style.backgroundColor = color;
@@ -145,8 +184,9 @@ class Game{
 				const td = document.createElement('td');
 				td.classList.add('cell')
 				td.addEventListener('click', () => {
-					this._checkColor(td.dataset['number']);
-					console.log(this._currentPair)
+					if (this._isRunnig){
+						this._checkColor(td.dataset['number']);
+					}
 				})
 				row.append(td);
 			}
@@ -158,12 +198,16 @@ class Game{
 		btn.classList.add('btn-game')
 		btn.innerHTML = 'Играть';
 		btn.addEventListener('click', () => {
-			this.start();
+			this._tick();
+			this._isRunnig = true;
 		})
 		container.append(btn)
 
 
-
+		const timeLabel = document.createElement('p');
+		timeLabel.innerHTML = '00 мин. 00 сек.'
+		this._timeLabel = timeLabel;
+		container.append(timeLabel)
 	}
 }
 

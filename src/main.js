@@ -4,6 +4,11 @@ class Game{
 
 	_range = [];
 
+	_isTurn = false;
+	_currentPair = {};
+	_firstNumber = null;
+	_pairsOfCells = [];
+
 	// Цвета
 	_colors = [
 		'#2ecc71', '#8e44ad', '#f1c40f', '#c0392b', 
@@ -14,10 +19,76 @@ class Game{
 		this._size = size;
 		this.range = size ** 2;
 		this._generateInterface();
+		this._getPairsOfNumbers();
 	}
 
 	start(){
 		console.log('Поехали!')
+	}
+
+	_findPairByNumber(number){
+		this._pairsOfCells.forEach((pair, i) => {
+			if (pair.includes(parseInt(number))){
+				this._currentPair.pair = pair;
+				this._currentPair.colorIndex = i;
+			}
+		})
+	}
+
+	_findColorByNumber(number){
+		let color;
+		this._pairsOfCells.forEach((pair, i) => {
+			if (pair.includes(parseInt(number))){
+				color = this._colors[i];
+			}
+		})
+		return color;
+	}
+
+	_splicePairFromPairs(){
+		for (let i = 0; i < this._pairsOfCells.length; i++){
+			const pair = this._pairsOfCells[i];
+			if (pair.includes(this._currentPair.pair[0])){
+				this._pairsOfCells.splice(i, 1);
+			}
+		}
+	}
+
+	_checkColor(cellNumber){
+		if (!this._isTurn){
+			
+			this._findPairByNumber(cellNumber);
+
+			const cell = document.querySelector(`[data-number="${cellNumber}"]`)
+			cell.style.backgroundColor = this._colors[this._currentPair.colorIndex]
+			
+			this._isTurn = true;
+			this._firstNumber = parseInt(cellNumber);
+
+		} else {
+			let secondNumber;
+
+			this._currentPair.pair.forEach(n => {
+				if (n !== this._firstNumber){
+					secondNumber = n;
+				}
+			})
+
+
+			const cell = document.querySelector(`[data-number="${cellNumber}"]`);
+			if (parseInt(cellNumber) === secondNumber){
+				cell.style.backgroundColor = this._colors[this._currentPair.colorIndex]
+				this._isTurn = false;
+			} else {
+				const color = this._findColorByNumber(cellNumber); 
+				cell.style.backgroundColor = color;
+				this._isTurn = true;
+
+				setTimeout(() => {
+					cell.style.backgroundColor = 'white';
+				}, 200)
+			}
+		}
 	}
 
 	set range(value){
@@ -34,12 +105,8 @@ class Game{
 		for (let i = 0; i < cells.length; i++){
 			const cell = cells[i];
 			cell.dataset['number'] = i + 1;
+			cell.innerHTML = i + 1;
 		}
-	}
-
-	_getRandomNumber(Max){
-		/* Генерирует случайное число в диапазоне от 0 до Max */
-		return Math.round(Math.random() * (Max - 1)) + 1;
 	}
 
 	_getPairsOfNumbers(){
@@ -55,6 +122,8 @@ class Game{
 				pairs.push(newPair);
 			}
 		}
+
+		this._pairsOfCells = pairs;
 	}
 
 	_randomSortColors(){
@@ -75,6 +144,10 @@ class Game{
 			for (let j = 0; j < this._size; j++){
 				const td = document.createElement('td');
 				td.classList.add('cell')
+				td.addEventListener('click', () => {
+					this._checkColor(td.dataset['number']);
+					console.log(this._currentPair)
+				})
 				row.append(td);
 			}
 			table.append(row);
@@ -85,7 +158,7 @@ class Game{
 		btn.classList.add('btn-game')
 		btn.innerHTML = 'Играть';
 		btn.addEventListener('click', () => {
-			this._getPairsOfNumbers();
+			this.start();
 		})
 		container.append(btn)
 

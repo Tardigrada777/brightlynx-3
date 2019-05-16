@@ -2,19 +2,34 @@ class Game{
 	// Размер игрового поля
 	_size;
 
+	// Массив чисел от 1 до 16 (используется для разбиения на случайные пары)
 	_range = [];
 
+	// Индикатор хода игрока
 	_isTurn = false;
+
+	// Пара ячеек во время хода (в зависимости от первого числа)
 	_currentPair = {};
+	// Первое число текущей пары
 	_firstNumber = null;
+
+	// Список всех пар чисел
 	_pairsOfCells = [];
 
+	// Ячейки, которые пользователь раскрасил	
+	// УСЛОВИЕ ПОБЕДЫ => количество этих ячеек == общее количество ячеек
 	_selectedCells = [];
+
+	// Запущена ли игра
 	_isRunnig = false;
 
+	// Время начала игры
 	_startTime = null;
+	// Текущая длительность игры
 	_currentTime = null;
+	// Ссылка на DOM элемент для обновления времени
 	_timeLabel = null;
+	// ID таймера
 	_mainTimerID = null;
 
 	// Цвета
@@ -31,6 +46,7 @@ class Game{
 	}
 
 	_isPlayerWin(){
+		/* Возвращает true если игрок выполнил условие победы */
 		return this._selectedCells.length == this._size ** 2;
 	}
 
@@ -44,7 +60,6 @@ class Game{
 			let seconds = (delta / 1000).toFixed(0);
 			let minutes = Math.floor(seconds / 60);
 
-			// TODO: Логика таймера
 			let time;
 			if (seconds < 60){
 				time = `00 мин. ${seconds} сек.`;
@@ -216,7 +231,6 @@ class Game{
 		btn.classList.add('btn-game')
 		btn.innerHTML = 'Играть';
 		btn.addEventListener('click', () => {
-
 			this._restart();
 			this._isRunnig = true;
 		})

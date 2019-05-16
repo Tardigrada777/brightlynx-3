@@ -15,6 +15,7 @@ class Game{
 	_startTime = null;
 	_currentTime = null;
 	_timeLabel = null;
+	_mainTimerID = null;
 
 	// Цвета
 	_colors = [
@@ -36,7 +37,7 @@ class Game{
 	_tick(){
 		this._startTime = new Date();
 
-		setInterval(() => {
+		let mainTimerID = setInterval(() => {
 			const currentTime = new Date();
 			const delta = currentTime.getTime() - this._startTime.getTime();
 			
@@ -55,6 +56,22 @@ class Game{
 			this._currentTime = time;
 			this._timeLabel.innerHTML = time;
 		}, 500)
+		this._mainTimerID = mainTimerID;
+	}
+
+	_restart(){
+		const container = document.querySelector('.game');
+		container.innerHTML = '';
+		this._generateInterface();
+
+		this._currentPair = {};
+		this._firstNumber = null;
+		this._pairsOfCells = [];
+		this._selectedCells = [];
+
+		this._getPairsOfNumbers();
+		this._tick();
+
 	}
 
 	_findPairByNumber(number){
@@ -105,7 +122,6 @@ class Game{
 				}
 			})
 
-
 			const cell = document.querySelector(`[data-number="${cellNumber}"]`);
 			if (parseInt(cellNumber) === secondNumber){
 				cell.style.backgroundColor = this._colors[this._currentPair.colorIndex]
@@ -116,6 +132,7 @@ class Game{
 				if (this._isPlayerWin()){
 					setTimeout(() => {
 						alert(`Вы выиграли! Затраченное время ${this._currentTime}`)
+						clearInterval(this._mainTimerID)
 					}, 0)
 				}
 			} else {
@@ -144,7 +161,6 @@ class Game{
 		for (let i = 0; i < cells.length; i++){
 			const cell = cells[i];
 			cell.dataset['number'] = i + 1;
-			cell.innerHTML = i + 1;
 		}
 	}
 
@@ -186,6 +202,8 @@ class Game{
 				td.addEventListener('click', () => {
 					if (this._isRunnig){
 						this._checkColor(td.dataset['number']);
+					} else {
+						alert('Сначала начните новую игру!')
 					}
 				})
 				row.append(td);
@@ -198,7 +216,8 @@ class Game{
 		btn.classList.add('btn-game')
 		btn.innerHTML = 'Играть';
 		btn.addEventListener('click', () => {
-			this._tick();
+
+			this._restart();
 			this._isRunnig = true;
 		})
 		container.append(btn)
